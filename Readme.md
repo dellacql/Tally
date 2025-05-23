@@ -1,117 +1,116 @@
-{
- "cells": [
-  {
-   "cell_type": "markdown",
-   "id": "9d10226e-df21-4eb7-bcc2-1ee7c9469355",
-   "metadata": {},
-   "source": [
-    "Alma Gill – A BFT-Based State Machine Replication for Fractional Balance Management\n",
-    "Abstract\n",
-    "This white paper introduces Alma Gill, a distributed ledger system designed for efficiently managing and updating a shared state representing fractional balances. Unlike traditional blockchain systems that maintain a complete history of all transactions, the [System Name] Ledger focuses on maintaining a current, authoritative state while discarding historical data after consensus is achieved. This approach prioritizes speed and storage efficiency, making it suitable for applications where immutability of history is less critical than real-time state synchronization. The system employs a Byzantine Fault Tolerance (BFT) consensus protocol to ensure data integrity and availability even in the presence of malicious or faulty nodes. A novel mechanism for account creation controlled by existing account holders is also introduced.\n",
-    "1. Introduction\n",
-    "The [System Name] Ledger is designed to address the need for a fast, efficient, and decentralized system for managing fractionalized assets or representations of value. Traditional blockchain systems, while providing strong immutability, can suffer from high transaction costs, slow confirmation times, and large storage requirements due to the need to maintain a complete transaction history.\n",
-    "The [System Name] Ledger adopts a different approach by focusing on maintaining an accurate and readily available current state, discarding historical data after it has been validated through consensus. This design allows for faster transaction processing, reduced storage overhead, and simplified node operations.\n",
-    "2. Design Principles\n",
-    "The [System Name] Ledger is built on the following key design principles:\n",
-    "o\tState-Centric: The primary focus is on maintaining a consistent and up-to-date representation of the current state of the system (i.e., account balances).\n",
-    "o\tByzantine Fault Tolerance: A robust BFT consensus protocol ensures that the state is accurately replicated across all nodes, even if some nodes are malicious or experience failures.\n",
-    "o\tSpeed and Efficiency: Prioritization of transaction processing speed and minimized storage requirements.\n",
-    "o\tPermissioned Account Creation: New accounts can only be created through the endorsement of existing account holders, providing a degree of control over network participation.\n",
-    "o\tFractionalized Representation: Supports the representation and transfer of assets in highly divisible units.\n",
-    "3. System Architecture\n",
-    "The [System Name] Ledger consists of the following key components:\n",
-    "o\tData Object (State): The core data structure is a key-value store where:\n",
-    "o\tKey: Public key/address of an account.\n",
-    "o\tValue: The account balance (a fractional value, adding up to a fixed total supply).\n",
-    "o\tTransactions: Transactions are signed messages containing the following information:\n",
-    "o\tsender_address: The public key of the account sending the funds.\n",
-    "o\trecipient_address: The public key of the account receiving the funds.\n",
-    "o\tamount: The amount to transfer.\n",
-    "o\tsignature: The sender's digital signature of the transaction.\n",
-    "o\tnew_account_address (optional): The public key of a new account being created (must be endorsed by the sender).\n",
-    "o\tBlocks: Blocks serve as containers for transactions to be agreed upon, blocks contain\n",
-    "o\ttimestamp: Block creation timestamp\n",
-    "o\ttransactions: A list of transactions to be applied to the state.\n",
-    "o\tprevious_hash: Hash of the previous block (links the blocks together, providing some immutability during the block creation process).\n",
-    "o\tmerkle_root: The Merkle root of the block's transactions.\n",
-    "o\tbft_signatures: List of signatures from BFT validators agreeing on the block.\n",
-    "o\tNodes (Validators): Nodes are responsible for:\n",
-    "o\tReceiving and verifying transactions.\n",
-    "o\tParticipating in the BFT consensus protocol.\n",
-    "o\tMaintaining a copy of the current data object.\n",
-    "4. Account Creation\n",
-    "The [System Name] Ledger employs a permissioned account creation mechanism to control network participation. New accounts can only be created if an existing account holder includes the new account's public key in a transaction and signs it. This transaction serves as an endorsement, vouching for the new account's legitimacy. The new account is initialized with a zero balance. This mechanism helps to prevent Sybil attacks and provides a degree of social trust within the network.\n",
-    "5. Consensus Protocol (BFT)\n",
-    "The [System Name] Ledger utilizes a BFT consensus protocol to ensure that all nodes agree on the current state of the system. The BFT protocol guarantees data integrity and availability even if some nodes are malicious or experience failures (up to a certain threshold).\n",
-    "[Detailed Description of Chosen BFT Protocol (e.g., Simplified Tendermint)]\n",
-    "This section should provide a detailed explanation of the chosen BFT protocol, including:\n",
-    "o\tRoles (Proposer, Validator)\n",
-    "o\tMessage Types (Propose, Pre-vote, Pre-commit, Commit)\n",
-    "o\tSteps in the Consensus Process (Propose, Vote, Commit)\n",
-    "o\tFault Tolerance Threshold\n",
-    "o\tMechanism for Validator Selection/Rotation (if applicable)\n",
-    "[ Example: In a simplified Tendermint-like implementation:\n",
-    "1.\tPropose: One node (the proposer) is selected to propose a new block. The proposer can be selected randomly, or based on a round-robin schedule.\n",
-    "2.\tPre-vote: Validators receive the proposed block and check its validity (transactions, signatures). If the block is valid, they send a \"pre-vote\" for the block; otherwise, they send a \"pre-vote nil\".\n",
-    "3.\tPre-commit: If a validator receives pre-votes for the same block from more than 2/3 of the total voting power (of all validators), they send a \"pre-commit\" for the block.\n",
-    "4.\tCommit: If a validator receives pre-commits for the same block from more than 2/3 of the total voting power, the block is considered committed. Validators then apply the block to their local state. *]\n",
-    "6. Transaction Validation and Processing\n",
-    "Before a transaction is included in a block and processed by the consensus protocol, it must be validated. Transaction validation involves the following steps:\n",
-    "o\tSignature Verification: Verifying that the transaction signature is valid and corresponds to the sender_address.\n",
-    "o\tSender Existence: Ensuring that the sender_address exists in the data object.\n",
-    "o\tSufficient Balance: Verifying that the sender_address has enough balance to cover the amount being sent.\n",
-    "o\tNew Account Creation Check: If the transaction includes a new_account_address, verifying that the account does not already exist.\n",
-    "After a block is finalized through the BFT consensus protocol, the transactions in the block are applied to the data object. Balances are updated, and new accounts are created (if specified in a transaction).\n",
-    "7. State Management and History Discarding\n",
-    "After a block is finalized and the transactions are applied to the data object, the historical block data is discarded. This includes the block itself, the transactions it contained, and the previous state of the data object. This design decision prioritizes storage efficiency and speed, but it also means that the system does not maintain a complete audit trail of past transactions. It is possible to create snapshots periodically for debugging or auditing, but the snapshot will not be a immutable record.\n",
-    "8. Economic and Philosophical Rationale\n",
-    "[This section is intentionally left blank for you to fill in.]\n",
-    "This section is critical for explaining:\n",
-    "o\tWhy this system is needed (the problem it solves).\n",
-    "o\tThe economic model: How the system incentivizes participation and prevents abuse.\n",
-    "o\tThe philosophical underpinnings: What values and principles guide the design and operation of the system?\n",
-    "o\tWhy discarding history is acceptable in the context of the intended use case.\n",
-    "o\tThe long-term vision for the [System Name] Ledger.\n",
-    "o\tHow can the ledger be applied to current or real world situations?\n",
-    "o\tWhat advantages does it hold over modern methods of value transfer?\n",
-    "o\tWhat advantages does it hold over competing crypto assets?\n",
-    "9. Security Considerations\n",
-    "The [System Name] Ledger employs several security measures to protect against various threats:\n",
-    "o\tBFT Consensus: Protects against malicious or faulty nodes.\n",
-    "o\tDigital Signatures: Ensure the authenticity and integrity of transactions.\n",
-    "o\tPermissioned Account Creation: Helps prevent Sybil attacks.\n",
-    "o\t[Add any additional security measures here (e.g., network security, key management, DoS protection).]\n",
-    "10. Future Directions\n",
-    "o\tSmart Contract Integration: Explore the possibility of integrating smart contract functionality into the system.\n",
-    "o\tScalability Improvements: Research and implement techniques to improve the scalability of the BFT consensus protocol.\n",
-    "o\tImproved Network Communication: Investigate the use of more efficient network protocols for node communication.\n",
-    "o\tData Object Snapshots: A system to create snapshots to preserve state data\n",
-    "11. Conclusion\n",
-    "The [System Name] Ledger offers a unique approach to distributed ledger technology, prioritizing speed and storage efficiency by maintaining a current state while discarding historical data. The BFT consensus protocol and permissioned account creation mechanism ensure data integrity and controlled network participation. The [System Name] Ledger is well-suited for applications where immutability of history is less critical than real-time state synchronization and efficient fractional balance management.\n",
-    "[End of White Paper Draft]\n",
-    "\n"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.11.3"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+## Tally: A Proof-of-Stake pBFT Blockchain
+
+##Introduction
+Tally is a cryptocurrency and distributed ledger system designed around a unique combination of fixed-supply digital coin and practical Byzantine Fault Tolerance (pBFT) consensus with Proof-of-Stake (PoS) validator        selection. Tally aims to provide a fast, secure, energy-efficient blockchain with minimal resource requirements and robust protection against fraud and Sybil attacks. This document gives an overview of Tally’s high-       level design, with special emphasis on its coin’s mathematical and cryptographic properties.
+
+## Coin Model and Properties
+1. Fixed-Supply, Infinitely-Divisible Token
+Genesis Allocation:
+Upon chain creation, 100% of Tally’s coin is initialized in a single genesis account. The system’s total value, typically represented as 1.0, is set in this first state and can never be increased or reduced. All value in the system exists from the very start; there is neither mining nor inflation, and the system is mathematically protected from deflation by design.
+No Minting, No Burning:
+Tally prohibits the creation or destruction of tokens after genesis. Coin is never “minted,” “burned,” or otherwise modified in supply. All transactions and state changes are simply redistributions or subdivisions of the original single coin.
+Infinite Divisibility:
+Tally treats its coin as a high-precision decimal value (e.g., supporting 40 decimal places). This permits coin to be subdivided into arbitrary, practically infinite fragments (i.e., no effective limit to the number of users/transactions that can be supported).
+For example, after several transactions, the system might have accounts holding 0.298523..., 0.00000000003123..., etc., but summing all accounts will always equal exactly 1.0.
+Account Creation by Division:
+New accounts are created only by subdividing existing balances.
+There is no way to create a new account with zero value – every new account must be “sponsored” by an existing one that transfers a positive amount. This ensures every account represents a portion of the original genesis supply.
+Mathematical Integrity:
+The core invariant is always enforced:
+Sum of all account balances = 1.0 (the original coin supply).
+Every block, every transaction, every update checks this property. No valid transaction or block can ever break it.
+
+
+
+2. Transactions, Security, and Sybil Resistance
+Cryptographic Security:
+All transfers are signed with elliptic curve cryptography and nonces to prevent replay attacks. Transaction validity is checked rigorously before any state update.
+Trusted Account Origination:
+Accounts can only be created through a signed transaction from an existing account—a built-in safeguard against automated Sybil attacks.
+Decentralized Yet Farming-Resistant:
+Validator selection and voting power is proportional to actual stake in the supply. Since no one can inflate their balance through artificial means, control always remains proportional to actual at-risk value.
+No Extrinsic Inflation Incentive:
+Since you cannot “mine” or “mint” new coins, the network is free from inflationary economic design and can remain maximally energy-efficient: no wasted PoW, no race-to-mine arms race, no new issuance.
+
+3. High Throughput and Fluidity
+No Hardcoded Block/Transaction Limits:
+The protocol sets no software limit on transaction count per block or block production frequency; throughput is entirely bounded by the processing and bandwidth capabilities of the current validator set.
+Liquidity and Scalability:
+Thanks to infinite divisibility, the system never “runs out” of tokens in practical terms—even trillions of accounts/transactions can be absorbed across arbitrarily many users.
+
+4. Additional Features
+Fair, Transparent Genesis:
+Every coin is visible on-chain at all times. All accounts and subdivisions are public, auditable, and cryptographically guaranteed.
+Lossless, Auditable Bookkeeping:
+At any time, all holders, accounts, and balances can be tabulated to verify the full ledger, ensuring maximal network transparency and assurance to users.
+
+## Key Features
+Practical Byzantine Fault Tolerance (pBFT): Tally uses a consensus algorithm resilient to up to a third of nodes being malicious, providing strong safety and liveness.
+Proof-of-Stake Validator Selection: Only nodes with a minimum stake are eligible to propose and validate blocks; validator power is proportional to staked amount. Leader rotation depends on the current “view” and token holding.
+Simplified, Transparent Design: No hidden monetary policy. The entire economics are visible in the present state of the ledger.
+Account Creation as a Transaction: New accounts may only be created via transactions funded by existing coin holders. No unbacked “free” accounts.
+
+Practical Byzantine Fault Tolerance (pBFT): A consensus algorithm that allows the network to tolerate up to a third of malicious or faulty nodes, ensuring data integrity and security.
+Transactions: Supports standard cryptocurrency transactions including sending and receiving Tally. New account creation is also supported via transactions. By creating a mechanism where only an existing account holder can create a new account through a transaction we can ensure that only trusted parties are able to transact.
+Simplified Implementation: This is a simplified simulation that focuses on core PoS pBFT concepts.
+Networking: Nodes communicate with each other over TCP sockets. Obviously once we achieve full production mechanism we will ensure a more robust method of communication between verifiers.
+
+## Architecture
+
+Tally consists of the following components:
+
+Node: Participates in consensus, manages a local ledger copy.
+Data Object: Holds the state (all balances).
+Transaction: Signed coin transfer and/or account-creation request.
+Block: Batch of transactions and metadata.
+Consensus (PoS pBFT): Validates blocks, rotates leader by view/stake, and ensures honest acceptance and ordering of blocks.
+
+
+## How it Works
+
+Staking: Users must have a minimum coin balance to become a validator.
+Primary Node Selection: Validators are selected deterministically by view/stake.
+Block Proposals and Voting: Transaction batches are proposed, voted on, and finalized using pBFT with PoS validator voting.
+Supply Integrity: After each block, the sum of all balances is checked and must equal the original genesis total; if not, the block is invalid.
+New Account Policy: Only accounts holding a true slice of the genesis supply may sponsor a new account, and every new account must be directly funded with a positive amount.
+
+Example: Lifecycle of a Tally Coin
+   Genesis:
+   Alice holds 1.0 Tally.
+   Alice splits:
+   She sends 0.3 to Bob → Alice: 0.7, Bob: 0.3 (Sum: 1.0)
+   Bob opens 3 sub-accounts for his children:
+   Sends 0.09 each → Bob: 0.03, Child1: 0.09, Child2: 0.09, Child3: 0.09
+   Across millions of accounts, the sum of all balances will always be 1.0.
+
+## Running the Simulation
+
+1.  **Prerequisites:**
+    *   Python 3.6 or higher.
+    *   Cryptography library: `pip install cryptography`
+
+2.  **Configuration:**
+    *   `NODE_ADDRESSES`: Configure the IP addresses and ports for each node in the `NODE_ADDRESSES` list.  Ensure that the ports are open on your system.  The current configuration uses localhost addresses (127.0.0.1) on different ports.
+    *   `initial_balances`: Modify the initial balances for each node in the `initial_balances` dictionary.
+    *   `validator_addresses`: Change which keys you want to use as validators.
+
+3.  **Execution:**
+    *   Run the `Tally.py` script.  This will start the simulation, creating three nodes that participate in the blockchain network.
+
+## Notes and Limitations
+
+*   **Simplified Implementation:** This is a simplified simulation for educational and demonstrative purposes.  It lacks features found in real-world blockchains (e.g., networking discovery, persistence, advanced transaction types).
+*   **Local Simulation:** The current implementation runs all nodes on a single machine (localhost).  A production blockchain would require nodes to be distributed across multiple machines.
+*   **Security Considerations:**  The cryptography used in this simulation is for demonstration purposes only.  A real-world blockchain would require more robust security measures.
+*   **No Persistence:** The blockchain data is lost when the simulation is stopped.
+
+##  Summary Table of Coin Properties
+Property	Tally	Bitcoin/Ethereum
+Total Supply	Set at genesis, never changes	Increases by mining/block rewards
+Divisibility	Up to 40 decimals (or more)	8 (BTC), 18 (ETH)
+Can be minted	No	Yes
+Can be burned	No (except optional fees)	Yes (ETH: with some tx fees)
+Account creation	Only by existing holders, funded	Anyone, typically no min balance
+
+
+## License
