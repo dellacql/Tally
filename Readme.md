@@ -1,9 +1,9 @@
-Tally: A Proof-of-Stake pBFT Blockchain
+## Tally: A Proof-of-Stake pBFT Blockchain
 
 ##Introduction
-   Tally is a cryptocurrency and distributed ledger system designed around a unique combination of fixed-supply digital coin and practical Byzantine Fault Tolerance (pBFT) consensus with Proof-of-Stake (PoS) validator        selection. Tally aims to provide a fast, secure, energy-efficient blockchain with minimal resource requirements and robust protection against fraud and Sybil attacks. This document gives an overview of Tally’s high-       level design, with special emphasis on its coin’s mathematical and cryptographic properties.
+Tally is a cryptocurrency and distributed ledger system designed around a unique combination of fixed-supply digital coin and practical Byzantine Fault Tolerance (pBFT) consensus with Proof-of-Stake (PoS) validator        selection. Tally aims to provide a fast, secure, energy-efficient blockchain with minimal resource requirements and robust protection against fraud and Sybil attacks. This document gives an overview of Tally’s high-       level design, with special emphasis on its coin’s mathematical and cryptographic properties.
 
-Coin Model and Properties
+## Coin Model and Properties
 1. Fixed-Supply, Infinitely-Divisible Token
 Genesis Allocation:
 Upon chain creation, 100% of Tally’s coin is initialized in a single genesis account. The system’s total value, typically represented as 1.0, is set in this first state and can never be increased or reduced. All value in the system exists from the very start; there is neither mining nor inflation, and the system is mathematically protected from deflation by design.
@@ -104,7 +104,7 @@ Example: Lifecycle of a Tally Coin
 *   **Security Considerations:**  The cryptography used in this simulation is for demonstration purposes only.  A real-world blockchain would require more robust security measures.
 *   **No Persistence:** The blockchain data is lost when the simulation is stopped.
 
-  ##Summary Table of Coin Properties
+##  Summary Table of Coin Properties
 Property	Tally	Bitcoin/Ethereum
 Total Supply	Set at genesis, never changes	Increases by mining/block rewards
 Divisibility	Up to 40 decimals (or more)	8 (BTC), 18 (ETH)
