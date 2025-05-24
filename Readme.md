@@ -1,6 +1,6 @@
 ## Tally: A Proof-of-Stake pBFT Blockchain
 
-##Introduction
+## Introduction
 Tally is a cryptocurrency and distributed ledger system designed around a unique combination of fixed-supply digital coin and practical Byzantine Fault Tolerance (pBFT) consensus with Proof-of-Stake (PoS) validator        selection. Tally aims to provide a fast, secure, energy-efficient blockchain with minimal resource requirements and robust protection against fraud and Sybil attacks. This document gives an overview of Tally’s high-       level design, with special emphasis on its coin’s mathematical and cryptographic properties.
 
 ## Coin Model and Properties
