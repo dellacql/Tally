@@ -97,4 +97,5 @@ Tally operates as a decentralized, account-based blockchain with a fixed, genesi
 ### 1. Start the Node
 
 ```bash
+cd Tally
 python -m tally.node
