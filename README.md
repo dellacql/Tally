@@ -9,14 +9,19 @@
 - [Features](#features)
 - [Coin Model and Properties](#coin-model-and-properties)
 - [Architecture & Protocol](#architecture--protocol)
-- [How to Run the Demo](#how-to-run-the-demo)
+- [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Configuration](#configuration)
+    - [Creating the Genesis Block](#creating-the-genesis-block)
+    - [Starting the Node](#starting-the-node)
 - [Wallet Usage](#wallet-usage)
     - [Creating a Wallet](#creating-a-wallet)
     - [Listing Addresses](#listing-addresses)
     - [Sending a Transaction](#sending-a-transaction)
     - [Checking a Balance](#checking-a-balance)
+- [Trading Coins](#trading-coins)
 - [Network & Node](#network--node)
-    - [Starting the Node](#starting-the-node)
     - [Block Verification](#block-verification)
 - [Development & Testing](#development--testing)
 - [FAQ](#faq)
@@ -92,10 +97,187 @@ Tally operates as a decentralized, account-based blockchain with a fixed, genesi
 
 ---
 
-## How to Run the Demo
+## Getting Started
 
-### 1. Start the Node
+### Prerequisites
 
-```bash
-cd Tally
-python -m tally.node
+-   Python 3.7+
+-   `pip` package installer
+-   A virtual environment (recommended)
+
+### Installation
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone <your_repository_url>
+    cd Tally_sample
+    ```
+
+2.  **Create and activate a virtual environment (recommended):**
+
+    ```bash
+    python -m venv venv  # Create
+    ```
+
+    *   **Windows:**
+
+        ```bash
+        venv\Scripts\activate  # Activate
+        ```
+
+    *   **macOS/Linux:**
+
+        ```bash
+        source venv/bin/activate  # Activate
+        ```
+
+3.  **Install dependencies:**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Install the project in editable mode:**
+
+    ```bash
+    pip install -e .
+    ```
+
+### Configuration
+
+*   **(If you have any configuration files or settings that need adjustment, explain them here)**
+*   **(Example: Explain how to set initial balances or network parameters.)**
+
+### Creating the Genesis Block
+
+The genesis block defines the initial state of the blockchain. Follow these steps to create it:
+
+1.  **Run the Genesis Block Creation Script:**
+   **1.Edit the scripts\\create_genesis.py and modify the values
+      You should edit the num_accounts and the initial_balance to the desired number and the amount you would like to start with
+      def main():
+        num_accounts = 4  # Number of accounts to create
+        initial_balance = 100.0  # Initial coins for each account
+        balances = create_genesis_balances(num_accounts, initial_balance)
+
+    **This command creates the genesis_balances.json. Ensure this step runs without errors!**
+
+    ```bash
+    python scripts/create_genesis.py
+    ```
+
+### Starting the Node
+
+The blockchain node is responsible for processing transactions, maintaining the ledger, and participating in the network.
+
+1.  **Run the Node:**
+
+    ```bash
+    python -m tally.rpc
+    ```
+
+    *   This will start the Flask server, typically on `http://127.0.0.1:5000`.  Keep this running in a separate terminal window.
+
+---
+
+## Wallet Usage
+
+The Tally wallet allows you to manage your addresses, send transactions, and check your balances.
+
+### Creating a Wallet
+
+1.  **Generate a new wallet address:**
+
+    ```bash
+    python -m tally_wallet.cli new
+    ```
+
+    This will generate a new address and store the private key in the `wallet.keys` file (or the keyring file you specify).
+
+### Listing Addresses
+
+1.  **List all wallet addresses:**
+
+    ```bash
+    python -m tally_wallet.cli list
+    ```
+
+    This command will display all addresses currently managed by your wallet.
+
+### Checking a Balance
+
+1.  **Check the balance of an address:**
+
+    ```bash
+    python -m tally_wallet.cli list
+    ```
+
+    This command will connect to the node and query the balance of the specified address.
+
+### Sending a Transaction
+
+1.  **Send a payment:**
+
+    ```bash
+    python -m tally_wallet.cli send <from_address> <to_address> <amount> --password <your_password>
+    ```
+
+    *   Replace `<from_address>` with the address you are sending from.
+    *   Replace `<to_address>` with the recipient's address.
+    *   Replace `<amount>` with the amount you want to send.
+    *   The `--password` option will prompt you for the password to unlock the sending address (if applicable).
+
+## Trading Coins
+
+To trade coins on the Tally network, follow these steps:
+
+1.  **Ensure the Node is Running:** Make sure your Tally node is running and connected to the network (see [Starting the Node](#starting-the-node)).
+
+2.  **Create and Fund Your Wallet:**
+    - Use the [Creating a Wallet](#creating-a-wallet) instructions to generate an address.
+    - Transfer tally coins into that wallet
+3.  **Get the Recipient's Address:** Obtain the Tally address of the person you want to send coins to.
+4.  **Execute the Send Transaction Command:**
+   -Make sure to verify that everything is as it should be, then execute the Send Transaction, where you will type in all the desired values
+
+---
+
+## Network & Node
+
+### Block Verification
+
+Nodes independently verify all blocks and transactions to ensure the integrity of the blockchain.
+
+1.  **(Add detailed instructions for verifying blocks, exploring the chain, etc.)**
+2.  **(You might include example commands for querying block data.)**
+
+---
+
+## Development & Testing
+
+1.  **(Include instructions on how to run the tests, contribute code, etc.)**
+
+---
+
+## FAQ
+
+1.  **(Include frequently asked questions and troubleshooting tips.)**
+
+---
+
+## Summary Table of Coin Properties
+
+| Property            | Value                                 |
+| ------------------- | ------------------------------------- |
+| Total Supply        | (Specify Total Supply)                |
+| Divisibility        | 40 decimal places                     |
+| Consensus Mechanism | Proof-of-Work (PoW)                    |
+| Block Reward        | None (Fee-Only Mining)                |
+| Minimum Fee         | (Specify Minimum Fee)                 |
+
+---
+
+## License
+
+(Your License Information Here)
