@@ -1,5 +1,7 @@
 # Tally Blockchain Project
-Tally is a minimal blockchain implementation with wallet support, transaction signing, a simple CLI, and a Flask-based node server. This project is ideal for learning or prototyping a basic UTXO-less (account-based) ledger.
+Tally is a minimal blockchain implementation with wallet support, transaction signing, a simple CLI, and a Flask-based node server. Tally is initialized with the full quantity of coin available. 
+Instead of mining new tokens the existing coin is divided infinitely into new accounts. No coin is ever created or detroyed making verification and security simpler while ensuring price is not contaminated by exogenous costs. 
+This project is ideal for learning or prototyping a basic UTXO-less (account-based) ledger.
 ________________________________________
 ## Features
   * Password-Encypted Wallets: Generate and safely store multiple accounts; private keys are encrypted with user-provided passwords using robust AES-GCM.
