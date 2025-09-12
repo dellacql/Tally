@@ -1,100 +1,135 @@
-# Tally Blockchain
-
-**Tally** is a highly-divisible, fixed-supply, fee-only decentralized blockchain and cryptocurrency system. Tally is designed for speed, liquidity, and security, using robust Proof-of-Work (PoW) for Sybil resistance, with every coin created at genesis and strong mathematical integrity. The system supports modular extension to Proof-of-Stake (PoS) with pBFT consensus.
-
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Coin Model and Properties](#coin-model-and-properties)
-- [Architecture & Protocol](#architecture--protocol)
-- [How to Run the Demo](#how-to-run-the-demo)
-- [Wallet Usage](#wallet-usage)
-    - [Creating a Wallet](#creating-a-wallet)
-    - [Listing Addresses](#listing-addresses)
-    - [Sending a Transaction](#sending-a-transaction)
-    - [Checking a Balance](#checking-a-balance)
-- [Network & Node](#network--node)
-    - [Starting the Node](#starting-the-node)
-    - [Block Verification](#block-verification)
-- [Development & Testing](#development--testing)
-- [FAQ](#faq)
-- [Summary Table of Coin Properties](#summary-table-of-coin-properties)
-- [License](#license)
-
----
-
+# Tally Blockchain Project
+Tally is a minimal blockchain implementation with wallet support, transaction signing, a simple CLI, and a Flask-based node server. This project is ideal for learning or prototyping a basic UTXO-less (account-based) ledger.
+________________________________________
 ## Features
+o	Password-Encypted Wallets: Generate and safely store multiple accounts; private keys are encrypted with user-provided passwords using robust AES-GCM.
+o	Short, CLI-Friendly Addresses: Wallet addresses are short, URL-safe, and based on a hash of the user's public key (not raw PEM/DER).
+o	Blockchain Node: A Flask server runs the blockchain, processes transactions, and exposes HTTP endpoints (/balance, /nonce, /sendtx, etc.).
+o	Genesis Configuration: Initialize the chain with funded accounts, fully under your control (only those with wallet-stored keys are usable).
+o	Transaction Creation & Signing: Build and sign transactions with your wallet; signatures are validated by the node using public keys sent in each transaction.
+o	Mining: Mempool, block mining, and block/hash validation.
+o	CLI Wallet: Command-line interface supports account creation, listing, sending coins, and more.
+o	Chain & Block Explorer Endpoints: Query current balances, blocks, and the mempool.
+________________________________________
+## Quick Start
+1. Install Dependencies
+pip install -r requirements.txt
+# If not present, you need:
+# pip install cryptography base58 flask click requests
+________________________________________
+2. Create Your Wallet Account
+Each account/password combo is created and encrypted locally (in wallet.keys):
+python -m tally_wallet.cli new
+o	Enter a password when prompted.
+o	On completion, your CLI will print your new address (a short base58 string).
+o	Keep your password safe! If you lose it, you can't recover the private key.
+________________________________________
+3. Prepare Genesis Block
+Only addresses for which you have local wallet keys should be funded in genesis!
+Create (or overwrite) genesis_balances.json.
+You can use the helper script:
+python scripts/create_genesis.py
+Paste your address (from the previous step) when prompted.
+Your address will be funded with 1.0 coins in genesis; you are now the initial "faucet."
+________________________________________
+4. Start the Blockchain Node
+In a new terminal:
+python -m tally.rpc
+or, if you use a helper script:
+python scripts/start_node.py
+o	The node will read genesis_balances.json and initialize itself.
+o	You should see output like:
+o	Genesis loaded from file.
+o	* Serving Flask app 'rpc'
+o	* Running on http://127.0.0.1:5000
+________________________________________
+5. Send Transactions
+Use your wallet to send coins from your funded account to any valid address:
+python -m tally_wallet.cli send <FROM_ADDR> <TO_ADDR> <AMOUNT>
+o	Example:
+o	python -m tally_wallet.cli send 3BotBqmAxEAiUxDuuRUBXeh26WNw rA9xdcnmGLdEfsyBMUqMUp5EXa6 0.25
+o	Enter your password (for <FROM_ADDR>) when prompted.
+o	The CLI will report whether the transaction was accepted.
+________________________________________
+6. Mine Transactions
+After sending, transactions enter the node’s mempool.
+To mine new blocks (and confirm transactions):
+curl -X POST http://127.0.0.1:5000/mine
+or send a POST request using any http client.
+________________________________________
+7. View the Blockchain and Explore
+Query balance:
+curl http://127.0.0.1:5000/balance/<ADDRESS>
+View mempool:
+curl http://127.0.0.1:5000/mempool
+Get a block by index:
+curl http://127.0.0.1:5000/block/<N>
+List all wallet addresses:
+python -m tally_wallet.cli list
+________________________________________
+##How it Works — Technical Details
+Wallets and Keys
+o	Each new account is locally protected by a password. Private keys use AES-GCM encryption.
+o	Wallet addresses are hashes of the public key (RIPEMD160(SHA256(...)) then Base58 encoding).
+o	Only short, URL-safe addresses are used for CLI and node communication.
+Genesis
+o	Fund only those addresses for which you control the private keys (using your wallet).
+o	The node loads balances from genesis_balances.json at launch.
+Transactions & Signatures
+o	Each transaction carries the public key as a base64-encoded DER.
+o	The node always verifies signatures against this included public key, not the short address.
+o	Transaction sender addresses are always short hashes, not PEMs.
+Node Functionality
+o	/sendtx endpoint adds validated transactions to the mempool.
+o	/mine endpoint processes the mempool into a new block, appends to the chain, and updates balances.
+o	All states are currently stored in memory (for demonstration and local testing).
+________________________________________
+## Features, Security & Limitations
+o	Encrypted key storage
+o	Message signing
+o	Address derivation is one-way and secure
+o	Password protection is enforced locally
+o	All communication is via HTTP (insecure, for test/dev only)
+o	No persistent blockchain state beyond runtime
+o	No P2P or network consensus — this is a single-node educational chain
+________________________________________
+## Advanced Topics & Customization
+o	Add more addresses to genesis_balances.json for multi-party devnet (each party creates their own wallet!)
+o	Implement/expand mining, difficulty adjustment, or REST documentation.
+o	Persist chain and wallet states to disk for a longer-lived local chain.
+________________________________________
+## Troubleshooting
+Issue	Solution
+"No connection/cannot reach node..."	Start the node first! (python -m tally.rpc)
+"Invalid signature"	Ensure CLI and node both include public_key in every transaction, and use it for verification, not the address hash. Field order+encoding in message must match for signing and verification.
+"Address not found in keyring"	You can only spend from addresses generated by your wallet.
+"Password required / is incorrect"	Enter the correct password chosen at account creation (no recovery if forgotten).
+"404 for /transaction"	The correct endpoint is /sendtx, not /transaction. Update your CLI accordingly.
+________________________________________
+License
+This project is for instructional/research use only.
+________________________________________
+Credits
+Built with Flask, cryptography, base58, Click.
+________________________________________
+Happy hacking!
+For questions or contributions, open an issue or pull request.
+________________________________________
+Example Workflow (Summary)
+# 1. Install required packages
+pip install -r requirements.txt
 
-- **Fixed Supply:** All coins (e.g., 1.0, highly divisible) are created at genesis. No mining, no inflation, no burning.
-- **Infinite Divisibility:** The coin is implemented as a high-precision decimal, supporting up to 40 decimal places.
-- **Fee-Only Mining:** Miners/validators are compensated by transaction fees; no new coin is minted.
-- **Proof-of-Work (PoW):** Efficient, dynamically tunable PoW for Sybil resistance. Block rate is set by difficulty, not inflation.
-- **Fast Verification:** Block and transaction validation is fast and deterministic.
-- **Sybil Resistant:** PoW and minimum transaction fees prevent spam and Sybil attacks.
-- **Account-based Model:** Each address is an ECC public key (PEM format); new accounts must be funded at creation.
-- **Extensible Modular Codebase:** Node, wallet, networking, and ledger logic are cleanly separated, making future PoS/pBFT upgrades straightforward.
-- **Transparent, Auditable Ledger:** Every account and transaction is visible on-chain, total supply invariant is enforced at every state update.
+# 2. Create an account in your wallet
+python -m tally_wallet.cli new
 
----
+# 3. Create genesis_balances.json with your new address
 
-## Coin Model and Properties
+# 4. Run the node server
+python -m tally.rpc
 
-- **Genesis Allocation:** Upon creation, 100% of Tally’s coin is initialized in the genesis account(s). The sum of all balances will always match the genesis total (e.g., 1.0).
-- **No Minting/Burning:** The coin supply is never increased or reduced. No new coins are minted and coins are never destroyed (except for spending as fees).
-- **Infinite Divisibility:** Values can be split into arbitrarily small pieces, supporting trillions of users or tiny payments.
-- **Account Creation by Division:** New accounts are only created by subdividing an existing balance; every account must be funded at creation.
-- **Mathematical Integrity:** The system enforces the invariant:  
-  `sum(all account balances) + sum(fees collected) = total genesis supply`
-- **Lossless, Auditable Bookkeeping:** The state is always fully auditable and transparent.
+# 5. List wallet addresses
+python -m tally_wallet.cli list
 
----
+# 6. Send some coins!
+python -m tally_wallet.cli send <FROM_ADDR> <TO_ADDR> <AMOUNT>
 
-## Architecture & Protocol
-
-### 1. Overview
-
-Tally operates as a decentralized, account-based blockchain with a fixed, genesis-minted supply. Each account is an ECC keypair. Transactions are authorized by ECDSA signatures and validated for correct nonces and balances.
-
-### 2. Block Structure
-
-- **index:** Block height
-- **prev_hash:** Hash of previous block
-- **txs:** List of transactions
-- **timestamp:** Time of block creation
-- **nonce:** PoW nonce
-- **hash:** Block hash
-
-### 3. Transaction Structure
-
-- **sender_addr:** Sender's public address (ECC PEM)
-- **recipient_addr:** Recipient's address (ECC PEM)
-- **amount:** Amount to transfer
-- **fee:** Transaction fee (set by sender, must meet minimum)
-- **nonce:** Sender's transaction count
-- **new_account_addr:** (Optional) Address to create a new account
-- **signature:** ECDSA signature
-
-### 4. Consensus & Security
-
-- **Proof-of-Work (PoW):** Each block must have a hash with a set number of leading zeros (difficulty). This prevents trivial spam and ensures Sybil resistance.
-- **No Block Reward:** Miners are paid only by fees from included transactions.
-- **Block Verification:** Nodes independently verify PoW, parent hash, and all included transactions.
-- **Dynamic Difficulty:** Difficulty may be adjusted to maintain target block times.
-- **Trusted Account Origination:** Only funded, signed transactions can create new accounts.
-- **Future-Proof:** The protocol can be extended to use PoS and pBFT for even higher efficiency and security.
-
-### 5. Transaction Fees
-
-- **Minimum Fee:** All transactions must include at least the minimum fee (prevents spam).
-- **Fee Distribution:** All fees in a block go to the miner (credited after block is mined).
-
----
-
-## How to Run the Demo
-
-### 1. Start the Node
-
-```bash
-python -m tally.node
