@@ -1,0 +1,10 @@
+README.md
+setup.py
+tally.egg-info/PKG-INFO
+tally.egg-info/SOURCES.txt
+tally.egg-info/dependency_links.txt
+tally.egg-info/requires.txt
+tally.egg-info/top_level.txt
+tests/test_blockchain.py
+tests/test_transaction.py
+tests/test_wallet.py
