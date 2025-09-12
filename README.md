@@ -2,29 +2,29 @@
 Tally is a minimal blockchain implementation with wallet support, transaction signing, a simple CLI, and a Flask-based node server. This project is ideal for learning or prototyping a basic UTXO-less (account-based) ledger.
 ________________________________________
 ## Features
-o	Password-Encypted Wallets: Generate and safely store multiple accounts; private keys are encrypted with user-provided passwords using robust AES-GCM.
-o	Short, CLI-Friendly Addresses: Wallet addresses are short, URL-safe, and based on a hash of the user's public key (not raw PEM/DER).
-o	Blockchain Node: A Flask server runs the blockchain, processes transactions, and exposes HTTP endpoints (/balance, /nonce, /sendtx, etc.).
-o	Genesis Configuration: Initialize the chain with funded accounts, fully under your control (only those with wallet-stored keys are usable).
-o	Transaction Creation & Signing: Build and sign transactions with your wallet; signatures are validated by the node using public keys sent in each transaction.
-o	Mining: Mempool, block mining, and block/hash validation.
-o	CLI Wallet: Command-line interface supports account creation, listing, sending coins, and more.
-o	Chain & Block Explorer Endpoints: Query current balances, blocks, and the mempool.
+-- Password-Encypted Wallets: Generate and safely store multiple accounts; private keys are encrypted with user-provided passwords using robust AES-GCM.
+-- Short, CLI-Friendly Addresses: Wallet addresses are short, URL-safe, and based on a hash of the user's public key (not raw PEM/DER).
+-- Blockchain Node: A Flask server runs the blockchain, processes transactions, and exposes HTTP endpoints (/balance, /nonce, /sendtx, etc.).
+-- Genesis Configuration: Initialize the chain with funded accounts, fully under your control (only those with wallet-stored keys are usable).
+-- Transaction Creation & Signing: Build and sign transactions with your wallet; signatures are validated by the node using public keys sent in each transaction.
+-- Mining: Mempool, block mining, and block/hash validation.
+-- CLI Wallet: Command-line interface supports account creation, listing, sending coins, and more.
+-- Chain & Block Explorer Endpoints: Query current balances, blocks, and the mempool.
 ________________________________________
-## Quick Start
+### Quick Start
 1. Install Dependencies
 pip install -r requirements.txt
-# If not present, you need:
-# pip install cryptography base58 flask click requests
+-- If not present, you need:
+pip install cryptography base58 flask click requests
 ________________________________________
-2. Create Your Wallet Account
+#### 2. Create Your Wallet Account
 Each account/password combo is created and encrypted locally (in wallet.keys):
 python -m tally_wallet.cli new
-o	Enter a password when prompted.
-o	On completion, your CLI will print your new address (a short base58 string).
-o	Keep your password safe! If you lose it, you can't recover the private key.
+-- Enter a password when prompted.
+-- On completion, your CLI will print your new address (a short base58 string).
+-- Keep your password safe! If you lose it, you can't recover the private key.
 ________________________________________
-3. Prepare Genesis Block
+#### 3. Prepare Genesis Block
 Only addresses for which you have local wallet keys should be funded in genesis!
 Create (or overwrite) genesis_balances.json.
 You can use the helper script:
@@ -32,32 +32,32 @@ python scripts/create_genesis.py
 Paste your address (from the previous step) when prompted.
 Your address will be funded with 1.0 coins in genesis; you are now the initial "faucet."
 ________________________________________
-4. Start the Blockchain Node
+#### 4. Start the Blockchain Node
 In a new terminal:
 python -m tally.rpc
 or, if you use a helper script:
 python scripts/start_node.py
-o	The node will read genesis_balances.json and initialize itself.
-o	You should see output like:
-o	Genesis loaded from file.
-o	* Serving Flask app 'rpc'
-o	* Running on http://127.0.0.1:5000
+-- The node will read genesis_balances.json and initialize itself.
+-- You should see output like:
+-- Genesis loaded from file.
+-- * Serving Flask app 'rpc'
+-- * Running on http://127.0.0.1:5000
 ________________________________________
-5. Send Transactions
+#### 5. Send Transactions
 Use your wallet to send coins from your funded account to any valid address:
 python -m tally_wallet.cli send <FROM_ADDR> <TO_ADDR> <AMOUNT>
-o	Example:
-o	python -m tally_wallet.cli send 3BotBqmAxEAiUxDuuRUBXeh26WNw rA9xdcnmGLdEfsyBMUqMUp5EXa6 0.25
-o	Enter your password (for <FROM_ADDR>) when prompted.
-o	The CLI will report whether the transaction was accepted.
+-- Example:
+-- python -m tally_wallet.cli send 3BotBqmAxEAiUxDuuRUBXeh26WNw rA9xdcnmGLdEfsyBMUqMUp5EXa6 0.25
+-- Enter your password (for <FROM_ADDR>) when prompted.
+-- The CLI will report whether the transaction was accepted.
 ________________________________________
-6. Mine Transactions
+#### 6. Mine Transactions
 After sending, transactions enter the node’s mempool.
 To mine new blocks (and confirm transactions):
 curl -X POST http://127.0.0.1:5000/mine
 or send a POST request using any http client.
 ________________________________________
-7. View the Blockchain and Explore
+#### 7. View the Blockchain and Explore
 Query balance:
 curl http://127.0.0.1:5000/balance/<ADDRESS>
 View mempool:
@@ -69,34 +69,34 @@ python -m tally_wallet.cli list
 ________________________________________
 ##How it Works — Technical Details
 Wallets and Keys
-o	Each new account is locally protected by a password. Private keys use AES-GCM encryption.
-o	Wallet addresses are hashes of the public key (RIPEMD160(SHA256(...)) then Base58 encoding).
-o	Only short, URL-safe addresses are used for CLI and node communication.
+-- Each new account is locally protected by a password. Private keys use AES-GCM encryption.
+-- Wallet addresses are hashes of the public key (RIPEMD160(SHA256(...)) then Base58 encoding).
+-- Only short, URL-safe addresses are used for CLI and node communication.
 Genesis
-o	Fund only those addresses for which you control the private keys (using your wallet).
-o	The node loads balances from genesis_balances.json at launch.
+-- Fund only those addresses for which you control the private keys (using your wallet).
+-- The node loads balances from genesis_balances.json at launch.
 Transactions & Signatures
-o	Each transaction carries the public key as a base64-encoded DER.
-o	The node always verifies signatures against this included public key, not the short address.
-o	Transaction sender addresses are always short hashes, not PEMs.
+-- Each transaction carries the public key as a base64-encoded DER.
+-- The node always verifies signatures against this included public key, not the short address.
+-- Transaction sender addresses are always short hashes, not PEMs.
 Node Functionality
-o	/sendtx endpoint adds validated transactions to the mempool.
-o	/mine endpoint processes the mempool into a new block, appends to the chain, and updates balances.
-o	All states are currently stored in memory (for demonstration and local testing).
+-- /sendtx endpoint adds validated transactions to the mempool.
+-- /mine endpoint processes the mempool into a new block, appends to the chain, and updates balances.
+-- All states are currently stored in memory (for demonstration and local testing).
 ________________________________________
 ## Features, Security & Limitations
-o	Encrypted key storage
-o	Message signing
-o	Address derivation is one-way and secure
-o	Password protection is enforced locally
-o	All communication is via HTTP (insecure, for test/dev only)
-o	No persistent blockchain state beyond runtime
-o	No P2P or network consensus — this is a single-node educational chain
+-- Encrypted key storage
+-- Message signing
+-- Address derivation is one-way and secure
+-- Password protection is enforced locally
+-- All communication is via HTTP (insecure, for test/dev only)
+-- No persistent blockchain state beyond runtime
+-- No P2P or network consensus — this is a single-node educational chain
 ________________________________________
 ## Advanced Topics & Customization
-o	Add more addresses to genesis_balances.json for multi-party devnet (each party creates their own wallet!)
-o	Implement/expand mining, difficulty adjustment, or REST documentation.
-o	Persist chain and wallet states to disk for a longer-lived local chain.
+-- Add more addresses to genesis_balances.json for multi-party devnet (each party creates their own wallet!)
+-- Implement/expand mining, difficulty adjustment, or REST documentation.
+-- Persist chain and wallet states to disk for a longer-lived local chain.
 ________________________________________
 ## Troubleshooting
 Issue	Solution
@@ -116,20 +116,20 @@ Happy hacking!
 For questions or contributions, open an issue or pull request.
 ________________________________________
 Example Workflow (Summary)
-# 1. Install required packages
+### 1. Install required packages
 pip install -r requirements.txt
 
-# 2. Create an account in your wallet
+### 2. Create an account in your wallet
 python -m tally_wallet.cli new
 
-# 3. Create genesis_balances.json with your new address
+### 3. Create genesis_balances.json with your new address
 
-# 4. Run the node server
+### 4. Run the node server
 python -m tally.rpc
 
-# 5. List wallet addresses
+### 5. List wallet addresses
 python -m tally_wallet.cli list
 
-# 6. Send some coins!
+### 6. Send some coins!
 python -m tally_wallet.cli send <FROM_ADDR> <TO_ADDR> <AMOUNT>
 
